@@ -339,3 +339,78 @@ These changes can help maintain good performance even when the system stores a l
 
 PostgreSQL is a suitable choice for this application because it works well with structured data and supports efficient querying. Using indexes, pagination and caching can help the system scale as the number of users and notifications increases.
 
+# Stage 3
+
+## Analysis of Existing Query
+
+```sql
+SELECT * FROM notifications
+WHERE studentID = 1042 AND isRead = false
+ORDER BY createdAt ASC;
+```
+
+The query is correct because it returns unread notifications of a particular student.
+However, when the table grows to around 5,000,000 notifications, the query can become slow. The database may need to scan a large number of rows before finding the required records. Sorting by `createdAt` can also increase execution time if proper indexing is not available.
+
+Another issue is the usage of `SELECT *`. It fetches all columns even if the application only requires a few fields. This increases data transfer and memory usage.
+
+## Improvements
+
+Instead of selecting all columns, only required columns can be fetched.
+
+```sql
+SELECT notificationID,
+       title,
+       message,
+       createdAt
+FROM notifications
+WHERE studentID = 1042
+  AND isRead = false
+ORDER BY createdAt ASC;
+```
+
+A composite index can also be created:
+
+```sql
+CREATE INDEX idx_notifications_student_read_date
+ON notifications(studentID, isRead, createdAt);
+```
+
+This allows the database to quickly locate unread notifications of a student and return them in the required order.
+
+## Expected Cost
+
+Without indexes, the query may perform close to O(n) scanning where n is the number of notifications.
+
+With the composite index, lookup becomes much faster and usually depends on index traversal rather than scanning the full table.
+
+## Should We Add Indexes On Every Column?
+
+I do not think adding indexes on every column is a good idea.
+
+Advantages:
+
+* Faster reads for some queries.
+
+Disadvantages:
+
+* More storage space is required.
+* Insert and update operations become slower.
+* Many indexes may never be used.
+
+Therefore indexes should be created based on actual query patterns instead of adding them everywhere.
+
+## Query To Find Students Who Received Placement Notifications In Last 7 Days
+
+```sql
+SELECT DISTINCT studentID
+FROM notifications
+WHERE notificationType = 'Placement'
+  AND createdAt >= NOW() - INTERVAL 7 DAY;
+```
+
+This query returns all unique students who received placement notifications during the last seven days.
+
+## Conclusion
+
+The main reason for the slowdown is the increase in data volume and the absence of suitable indexing. Using a composite index and avoiding unnecessary column selection can significantly improve performance while keeping storage overhead reasonable.
