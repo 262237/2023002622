@@ -438,3 +438,65 @@ For real-time updates, WebSockets can be used. When a new notification is create
 The drawback is that maintaining WebSocket connections is a little more complex compared to normal REST APIs.
 
 In my opinion, a combination of pagination, caching and WebSocket notifications would be enough for this system. It reduces database load while still providing a good user experience.
+
+# Stage 5
+
+## My Observation
+
+The current logic looks simple but I don't think it will work well when 50,000 students need to be notified.
+
+If the system sends email, saves data and pushes notification one by one, the whole process may take a long time. Also if email sending fails somewhere in the middle, some students may get the notification while others may not.
+
+For example, if 200 email requests fail, we need a way to identify them and try again instead of running the entire process again.
+
+## My Suggested Solution
+
+I would separate notification creation from notification delivery.
+
+When HR clicks "Notify All", the system should first create the notification record and then create jobs for each student. These jobs can be processed in the background.
+
+### Revised Flow
+
+```text id="knx4wo"
+notifyAll(studentIds, message)
+
+save notification details
+
+for each student:
+    create delivery job
+
+background worker:
+
+get next job
+
+send email
+
+send in-app notification
+
+update delivery status
+```
+
+## Handling Failures
+
+If email sending fails, I would not stop the entire process.
+
+Instead:
+
+* Mark the job as failed.
+* Retry it a few times.
+* Store failed jobs separately for later review.
+
+This way the remaining students can still receive notifications.
+
+## Database And Email
+
+In my opinion, saving data to the database and sending emails should not happen in a single transaction.
+
+Database operations are generally quick, but email delivery depends on an external service and can fail for many reasons.
+
+Because of that, I would save the notification first and then let background workers handle email delivery.
+
+## Final Thoughts
+
+For a small number of users, the original approach may work. But for 50,000 students I think using background jobs and retry mechanisms would be much more reliable and easier to manage.
+
