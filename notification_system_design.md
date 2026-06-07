@@ -496,6 +496,23 @@ Database operations are generally quick, but email delivery depends on an extern
 
 Because of that, I would save the notification first and then let background workers handle email delivery.
 
+## Stage 6
+
+I used a simple priority based approach.
+
+Placement notifications are given highest priority, followed by Result notifications and then Event notifications.
+
+Priority values:
+- Placement = 3
+- Result = 2
+- Event = 1
+
+A score is calculated using both notification type and recency. Newer notifications get slightly higher preference when notifications have similar importance.
+
+To get top 10 notifications, notifications are sorted based on score and first 10 records are returned.
+
+If notifications keep coming continuously, maintaining a min heap of size 10 would be more efficient than sorting the entire list every time.
+
 ## Final Thoughts
 
 For a small number of users, the original approach may work. But for 50,000 students I think using background jobs and retry mechanisms would be much more reliable and easier to manage.
