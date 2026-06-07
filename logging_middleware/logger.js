@@ -21,6 +21,8 @@ export async function Log(stack, level, packageName, message) {
 
     return await response.json();
   } catch (error) {
-    console.error(error);
+    return {
+      error: error.message
+    };
   }
 }
