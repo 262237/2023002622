@@ -517,3 +517,20 @@ If notifications keep coming continuously, maintaining a min heap of size 10 wou
 
 For a small number of users, the original approach may work. But for 50,000 students I think using background jobs and retry mechanisms would be much more reliable and easier to manage.
 
+## Stage 7
+
+Frontend will be developed using React.
+
+Pages:
+1. Notifications Page
+2. Priority Notifications Page
+
+Features:
+- View all notifications
+- Filter by notification type
+- Show read and unread notifications separately
+- Display top priority notifications
+- Responsive layout for desktop and mobile
+
+The application will fetch notifications from the provided API using page, limit and notification_type query parameters.
+
