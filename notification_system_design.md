@@ -414,3 +414,27 @@ This query returns all unique students who received placement notifications duri
 ## Conclusion
 
 The main reason for the slowdown is the increase in data volume and the absence of suitable indexing. Using a composite index and avoiding unnecessary column selection can significantly improve performance while keeping storage overhead reasonable.
+
+# Stage 4
+
+## Performance Improvements
+
+As the number of students increases, fetching notifications from the database on every page load is not a good idea. The database will receive too many requests and response time may increase.
+
+One thing I would do is load notifications only when the user opens the notification section instead of loading them on every page. This can reduce many unnecessary database calls.
+
+Another option is using Redis cache. Frequently accessed data such as unread notification count can be stored in cache. This will reduce pressure on the database.
+
+**Advantage:** Faster response.
+
+**Disadvantage:** Cache data may sometimes become outdated for a short time.
+
+I would also use pagination. For example, instead of returning 500 notifications, return only the latest 20 and load more when needed.
+
+This reduces network traffic and makes the application feel faster.
+
+For real-time updates, WebSockets can be used. When a new notification is created, it can be pushed directly to the user instead of repeatedly checking the server.
+
+The drawback is that maintaining WebSocket connections is a little more complex compared to normal REST APIs.
+
+In my opinion, a combination of pagination, caching and WebSocket notifications would be enough for this system. It reduces database load while still providing a good user experience.
