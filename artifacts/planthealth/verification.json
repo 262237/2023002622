@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "tests_run": 4,
+  "saved_model_evaluation": {
+    "test_accuracy": 0.9152542372881356,
+    "macro_f1": 0.916044907032458,
+    "test_images": 295,
+    "recorded_accuracy_matches": true
+  },
+  "notebook_code_syntax": "passed",
+  "model_sha256": "ffa2ab906c9412517a9245ebcc02c8e36d62bfcdd127a8b7f02e5cf1f26fdf1d"
+}

@@ -1,1 +1,12 @@
-node_modules/
+.venv/
+.publish/
+.cache/
+__pycache__/
+*.pyc
+data/
+artifacts/*/*.keras
+!artifacts/planthealth/model.keras
+artifacts/*/features/
+.streamlit/secrets.toml
+PlantHealth_Interview_Project.zip
+artifacts/setup_attempt/
